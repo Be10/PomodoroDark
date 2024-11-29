@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomodoro Timer</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg-light: #f9f9f9;
+      --text-light: #000;
+      --btn-light: #e0e0e0;
+      --btn-hover-light: #d6d6d6;
+
+      --bg-dark: #121212;
+      --text-dark: #fff;
+      --btn-dark: #333;
+      --btn-hover-dark: #555;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .container {
+      text-align: center;
+      padding: 20px;
+      border-radius: 25px;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .timer {
+      font-size: 6rem;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .toggle-mode {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    button {
+      background-color: var(--btn-light);
+      color: var(--text-light);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 15px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    button:hover {
+      background-color: var(--btn-hover-light);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: var(--bg-dark);
+        color: var(--text-dark);
+      }
+
+      .container {
+        background-color: var(--bg-dark);
+        color: var(--text-dark);
+      }
+
+      button {
+        background-color: var(--btn-dark);
+        color: var(--text-dark);
+      }
+
+      button:hover {
+        background-color: var(--btn-hover-dark);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="timer" id="timer">
+      00:00
+      <button class="toggle-mode" id="toggleMode" aria-label="Toggle Mode"></button>
+    </div>
+    <div class="buttons">
+      <button id="decrease">-</button>
+      <button id="start">Start</button>
+      <button id="increase">+</button>
+    </div>
+    <div class="buttons">
+      <button id="shortBreak">Short Break</button>
+      <button id="longBreak">Long Break</button>
+    </div>
+    <div class="buttons">
+      <button id="cancel">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const timerElement = document.getElementById('timer');
+    let timer = 0;
+    let countdown;
+    let isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    // Sound generation function using Web Audio API
+    function playAlarmSound() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+      // Function to play a single chime sound with smooth fade-out
+      function playChime(frequency, duration, startTime) {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + startTime);
+        gainNode.gain.setValueAtTime(0.5, audioContext.currentTime + startTime);
+
+        oscillator.start(audioContext.currentTime + startTime);
+
+        // Gradually reduce the volume to 0 for a smooth fade-out
+        gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + startTime + duration);
+
+        oscillator.stop(audioContext.currentTime + startTime + duration);
+      }
+
+      // Play the "ding" (short)
+      playChime(550, 0.2, 0);
+
+      // Play the "dong" (longer)
+      playChime(550, 0.5, 0.3);
+    }
+
+    function updateTimerDisplay() {
+      const minutes = String(Math.floor(timer / 60)).padStart(2, '0');
+      const seconds = String(timer % 60).padStart(2, '0');
+      timerElement.textContent = `${minutes}:${seconds}`;
+    }
+
+    document.getElementById('decrease').addEventListener('click', () => {
+      if (timer > 0) {
+        timer -= 60;
+        updateTimerDisplay();
+      }
+    });
+
+    document.getElementById('increase').addEventListener('click', () => {
+      timer += 60;
+      updateTimerDisplay();
+    });
+
+    document.getElementById('start').addEventListener('click', () => {
+      if (timer > 0 && !countdown) {
+        countdown = setInterval(() => {
+          timer--;
+          updateTimerDisplay();
+          if (timer === 0) {
+            clearInterval(countdown);
+            countdown = null;
+            playAlarmSound();
+          }
+        }, 1000);
+      }
+    });
+
+    document.getElementById('shortBreak').addEventListener('click', () => {
+      timer += 5 * 60;
+      updateTimerDisplay();
+    });
+
+    document.getElementById('longBreak').addEventListener('click', () => {
+      timer += 15 * 60;
+      updateTimerDisplay();
+    });
+
+    document.getElementById('cancel').addEventListener('click', () => {
+      clearInterval(countdown);
+      countdown = null;
+      timer = 0;
+      updateTimerDisplay();
+    });
+
+    document.getElementById('toggleMode').addEventListener('click', () => {
+      isDarkMode = !isDarkMode;
+      if (isDarkMode) {
+        document.documentElement.style.setProperty('--bg-light', '#121212');
+        document.documentElement.style.setProperty('--text-light', '#fff');
+        document.documentElement.style.setProperty('--btn-light', '#333');
+        document.documentElement.style.setProperty('--btn-hover-light', '#555');
+      } else {
+        document.documentElement.style.setProperty('--bg-light', '#f9f9f9');
+        document.documentElement.style.setProperty('--text-light', '#000');
+        document.documentElement.style.setProperty('--btn-light', '#e0e0e0');
+        document.documentElement.style.setProperty('--btn-hover-light', '#d6d6d6');
+      }
+    });
+
+    updateTimerDisplay();
+  </script>
+</body>
+</html>
