@@ -1,134 +1,170 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pomodoro Timer</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      --text-light: #000;
-      --btn-light: #e0e0e0;
-      --btn-hover-light: #d6d6d6;
-
-      --bg-dark: #191919;
-      --text-dark: #fff;
-      --btn-dark: #333;
-      --btn-hover-dark: #555;
-    }
-
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notion Timer</title>
+<style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #191919;
-      color: var(--text-light);
-      transition: background-color 0.3s, color 0.3s;
-    }
-
-    .container {
-      text-align: center;
-      padding: 20px;
-      border-radius: 25px;
-      background-color: var(--bg-light);
-      color: var(--text-light);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.3s, color 0.3s;
+        font-family: "Sans-serif workhorse", sans-serif;
+        background-color: transparent; /* Changed to transparent */
+        color: #fff;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
     }
 
     .timer {
-      font-size: 6rem;
-      margin-bottom: 20px;
-      position: relative;
+        width: 180px; /* Adjusted width */
+        height: 180px; /* Adjusted height */
+        border-radius: 12px; /* Adjusted border radius */
+        background-color: #262626; /* Add dark square around the timer with rounded edges */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 15px; /* Adjusted padding */
     }
 
-    .toggle-mode {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: transparent;
-      border: none;
-      cursor: pointer;
+    .display {
+        font-size: 4.2em; /* Adjusted font size */
+        color: #fff;
+        margin-bottom: 2px; /* Adjusted space between display and buttons */
     }
 
     .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: 5px;
+        margin-bottom: 1px; /* Adjusted space between buttons and bottom of the timer */
     }
 
-    button {
-      background-color: var(--btn-light);
-      color: var(--text-light);
-      border: none;
-      padding: 10px 20px;
-      border-radius: 15px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s, color 0.3s;
+    .buttons button {
+        padding: 8px 12px; /* Adjusted padding to make buttons slightly bigger */
+        margin: 1px; /* Adjusted margin */
+        opacity: 0.5;
+        transition: opacity 0.3s;
+        border: none;
+        border-radius: 10px; /* Adjusted border radius */
+        background-color: #444;
+        color: #fff;
+        cursor: pointer;
+        font-size: 0.62em; /* Reduced font size */
     }
 
-    button:hover {
-      background-color: var(--btn-hover-light);
+    .buttons button.large {
+        font-size: 0.62em; /* Reduced font size for larger buttons */
     }
 
-    @media (prefers-color-scheme: dark) {
-      body {
-        background-color: var(--bg-dark);
-        color: var(--text-dark);
-      }
-
-      .container {
-        background-color: #262626;
-        color: var(--text-dark);
-      }
-
-      button {
-        background-color: var(--btn-dark);
-        color: var(--text-dark);
-      }
-
-      button:hover {
-        background-color: var(--btn-hover-dark);
-      }
+    .buttons button:hover {
+        opacity: 0.8;
     }
-  </style>
+
+    .buttons button:active {
+        opacity: 0.8;
+    }
+
+    .buttons button:disabled {
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    .buttons button.highlighted {
+        background-color: #2f2f2f;
+    }
+
+    #cancel {
+        padding: 8px 12px; /* Adjusted padding */
+        margin: 1px; /* Adjusted margin */
+        opacity: 0.5;
+        transition: opacity 0.3s;
+        border: none;
+        border-radius: 10px; /* Adjusted border radius */
+        background-color: #444;
+        color: #fff;
+        cursor: pointer;
+        font-size: 0.62em; /* Reduced font size */
+    }
+
+    #cancel:hover {
+        opacity: 0.8;
+    }
+
+    #cancel:active {
+        opacity: 0.8;
+    }
+
+    #cancel:disabled {
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    @keyframes flash {
+        0% { background-color: #262626; }
+        50% { background-color: #fff; }
+        100% { background-color: #262626; }
+    }
+
+    .flash-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        border-radius: 22px; /* Adjusted border radius */
+        animation: fadeIn 1s ease-out;
+    }
+
+    .overlay-text {
+        font-size: 0.5em;
+        color: rgba(255, 255, 255, 0.3);
+        text-align: center;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 0.5; }
+    }
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="timer" id="timer">
-      00:00
-      <button class="toggle-mode" id="toggleMode" aria-label="Toggle Mode"></button>
+<div class="timer" id="timer">
+    <div class="display" id="timerDisplay">25:00</div>
+    <div class="buttons">
+        <button id="minus" onmousedown="startAdjustTime(-60)" onmouseup="stopAdjustTime()" class="large">-</button>
+        <button id="start" onclick="toggleTimer()" class="large">Start</button>
+        <button id="plus" onmousedown="startAdjustTime(60)" onmouseup="stopAdjustTime()" class="large">+</button>
     </div>
     <div class="buttons">
-      <button id="decrease">-</button>
-      <button id="start">Start</button>
-      <button id="increase">+</button>
+        <button id="shortBreak" onclick="setShortBreak()">Short Break</button>
+        <button id="longBreak" onclick="setLongBreak()">Long Break</button>
     </div>
     <div class="buttons">
-      <button id="shortBreak">Short Break</button>
-      <button id="longBreak">Long Break</button>
+        <button id="cancel" onclick="cancelTimer()">Cancel</button>
     </div>
-    <div class="buttons">
-      <button id="cancel">Cancel</button>
-    </div>
-  </div>
+</div>
 
-  <script>
-    const timerElement = document.getElementById('timer');
-    let timer = 0;
-    let countdown;
-    let isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+<div class="flash-overlay" id="overlay" style="display: none;" onclick="stopFlash()">
+    <div class="overlay-text">Click anywhere to stop the timer</div>
+</div>
 
-    // Sound generation function using Web Audio API
-    function playAlarmSound() {
+<script>
+    let timer;
+    let time = 1500;
+    let isRunning = false;
+    let adjustTimerInterval;
+  
+  // Play Sound
+  function playAlarmSound() {
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
       // Function to play a single chime sound with smooth fade-out
@@ -156,72 +192,96 @@
       // Play the "dong" (longer)
       playChime(550, 0.5, 0.3);
     }
+  
+  //
 
-    function updateTimerDisplay() {
-      const minutes = String(Math.floor(timer / 60)).padStart(2, '0');
-      const seconds = String(timer % 60).padStart(2, '0');
-      timerElement.textContent = `${minutes}:${seconds}`;
+    function startAdjustTime(seconds) {
+        adjustTime(seconds);
+        adjustTimerInterval = setInterval(function() {
+            adjustTime(seconds);
+        }, 100);
     }
 
-    document.getElementById('decrease').addEventListener('click', () => {
-      if (timer > 0) {
-        timer -= 60;
-        updateTimerDisplay();
-      }
-    });
+    function stopAdjustTime() {
+        clearInterval(adjustTimerInterval);
+    }
 
-    document.getElementById('increase').addEventListener('click', () => {
-      timer += 60;
-      updateTimerDisplay();
-    });
+    function toggleTimer() {
+        if (!isRunning) {
+            isRunning = true;
+            timer = setInterval(updateTimer, 1000);
+            document.getElementById('start').innerText = 'Pause';
+        } else {
+            isRunning = false;
+            clearInterval(timer);
+            document.getElementById('start').innerText = 'Resume';
+        }
+    }
 
-    document.getElementById('start').addEventListener('click', () => {
-      if (timer > 0 && !countdown) {
-        countdown = setInterval(() => {
-          timer--;
-          updateTimerDisplay();
-          if (timer === 0) {
-            clearInterval(countdown);
-            countdown = null;
+    function cancelTimer() {
+        clearInterval(timer);
+        time = 0;
+        isRunning = false;
+        document.getElementById('timerDisplay').innerText = formatTime(time);
+        document.getElementById('start').innerText = 'Start';
+    }
+
+    function updateTimer() {
+        if (time > 0) {
+            time--;
+            document.getElementById('timerDisplay').innerText = formatTime(time);
+        } else if (time === 0) {
+            clearInterval(timer);
+            isRunning = false;
+            document.getElementById('start').innerText = 'Start';
             playAlarmSound();
-          }
-        }, 1000);
-      }
-    });
+            document.getElementById('timer').style.display = 'none';
+            document.getElementById('overlay').style.display = 'flex';
+            document.getElementById('overlay').style.animation = 'flash 0.5s infinite';
+        }
+    }
 
-    document.getElementById('shortBreak').addEventListener('click', () => {
-      timer += 5 * 60;
-      updateTimerDisplay();
-    });
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
 
-    document.getElementById('longBreak').addEventListener('click', () => {
-      timer += 15 * 60;
-      updateTimerDisplay();
-    });
+    function adjustTime(seconds) {
+        time += seconds;
+        if (time < 0) {
+            time = 0;
+        }
+        document.getElementById('timerDisplay').innerText = formatTime(time);
+        
+        if (time > 0) {
+            document.getElementById('start').removeAttribute('disabled');
+        } else {
+            document.getElementById('start').setAttribute('disabled', 'disabled');
+        }
+    }
 
-    document.getElementById('cancel').addEventListener('click', () => {
-      clearInterval(countdown);
-      countdown = null;
-      timer = 0;
-      updateTimerDisplay();
-    });
+    function setShortBreak() {
+        time = 300;
+        document.getElementById('timerDisplay').innerText = formatTime(time);
+        document.getElementById('start').removeAttribute('disabled');
+    }
 
-    document.getElementById('toggleMode').addEventListener('click', () => {
-      isDarkMode = !isDarkMode;
-      if (isDarkMode) {
-        document.documentElement.style.setProperty('--bg-light', '#121212');
-        document.documentElement.style.setProperty('--text-light', '#fff');
-        document.documentElement.style.setProperty('--btn-light', '#333');
-        document.documentElement.style.setProperty('--btn-hover-light', '#555');
-      } else {
-        document.documentElement.style.setProperty('--bg-light', '#f9f9f9');
-        document.documentElement.style.setProperty('--text-light', '#000');
-        document.documentElement.style.setProperty('--btn-light', '#e0e0e0');
-        document.documentElement.style.setProperty('--btn-hover-light', '#d6d6d6');
-      }
-    });
+    function setLongBreak() {
+        time = 900;
+        document.getElementById('timerDisplay').innerText = formatTime(time);
+        document.getElementById('start').removeAttribute('disabled');
+    }
 
-    updateTimerDisplay();
-  </script>
+    function stopFlash() {
+        document.getElementById('overlay').style.animation = 'fadeOut 0.5s ease-out';
+        setTimeout(function() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('timer').style.display = 'flex';
+        }, 500);
+    }
+</script>
+
 </body>
+
 </html>
